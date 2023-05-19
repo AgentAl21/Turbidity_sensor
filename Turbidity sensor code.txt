@@ -1,0 +1,55 @@
+#include <LiquidCrystal.h>
+
+int calib_bool = 0;
+int calib[4];
+int base = 0;
+float per;
+int measurement;
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+void setup()
+{
+  pinMode(A0, INPUT);
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+}
+
+void loop()
+{
+  if(calib_bool == 0)
+  {
+    lcd.setCursor(0, 0);
+    lcd.print("Starting");
+    lcd.setCursor(0, 1);
+    lcd.print("Calibration...");
+    for (int i=0; i<5; i++)
+    {
+      calib[i] = analogRead(A0);
+      base = base + calib[i];
+      delay(200);
+    }
+    calib_bool = 1;
+    base = base / 5;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Calibration");
+    lcd.setCursor(0, 1);
+    lcd.print("Completed!");
+    Serial.println (base);
+    delay(5000);
+  }
+  measurement = analogRead(A0);
+  per = 100 - (float(base) - float(measurement));
+  if (per>100)
+  {
+    per = 100;
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Clear (%):");
+  lcd.setCursor(0, 1);
+  lcd.print(per);
+  delay(1000);
+}
